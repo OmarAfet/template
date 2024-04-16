@@ -5,7 +5,7 @@ export default function Hero() {
   return (
     <div className="center flex-col space-y-8">
       <div className="center flex-col space-y-4">
-        <h1>Welcome to Logo</h1>
+        <h1>Welcome to Template</h1>
         <p className="text-muted-foreground">
           A NextJS Template Made by{" "}
           <Link
