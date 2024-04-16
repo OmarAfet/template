@@ -9,24 +9,26 @@ import { Toaster } from "@/components/ui/toaster";
 const font = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	title: {
-		template: "%s | NextJS Template",
-		default: "NextJS Template by @OmarAfet",
-	},
-	description: "A NextJS template with TailwindCSS, TypeScript, and more. made by @OmarAfet",
+  title: {
+    template: "%s | Title",
+    default: "Title",
+  },
+  description: "Description",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-	return (
-		<html lang="en" className="!scroll-smooth" suppressHydrationWarning>
-			<body className={`${font.className} h-screen antialiased flex flex-col`}>
-				<MainProvider>
-					<Header />
-					<main className="flex-1 container my-8 md:my-16">{children}</main>
-					<Footer />
-					<Toaster />
-				</MainProvider>
-			</body>
-		</html>
-	);
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en" className="!scroll-smooth" suppressHydrationWarning>
+      <body className={`${font.className} flex h-screen flex-col antialiased`}>
+        <MainProvider>
+          <Header />
+          <main className="container my-8 flex-1 md:my-16">{children}</main>
+          <Footer />
+          <Toaster />
+        </MainProvider>
+      </body>
+    </html>
+  );
 }

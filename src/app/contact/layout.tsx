@@ -1,7 +1,11 @@
 export const metadata = {
-	title: "Contact",
+  title: "Contact",
 };
 
-export default function ContactLayout({ children }: { children: React.ReactNode }) {
-	return children;
+export default function ContactLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return children;
 }
