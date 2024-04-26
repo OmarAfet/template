@@ -21,8 +21,8 @@ To get started with this template, follow these simple steps:
 ```bash
 git clone https://github.com/OmarAfet/template.git .
 git remote rm origin
-npm i
-npm run dev
+bun i
+bun run dev
 ```
 
 That's it! You're ready to start building your awesome web application with this template. If you have any questions or feedback, feel free to reach out to @OmarAfet on GitHub.
