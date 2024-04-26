@@ -10,10 +10,31 @@ const font = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Title",
-    default: "Title",
+    template: "%s | Template", // %s will be replaced with the page title
+    default: "Template",
   },
-  description: "Description",
+  description: "A Sstraightforward NextJS Template Made by @OmarAfet",
+  keywords: ["Template", "Keyword 2", "Keyword 3"],
+  metadataBase: new URL("https://template.omarafet.vercel.app"),
+  authors: { url: "https://github.com/OmarAfet", name: "OmarAfet" },
+  icons: {
+    icon: [
+      {
+        rel: "icon",
+        type: "image/png",
+        url: "/icon-light.png",
+        href: "/icon-light.png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        url: "/icon-dark.png",
+        href: "/icon-dark.png",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
