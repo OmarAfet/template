@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/common/Header";
-import Footer from "@/components/common/Footer";
 import MainProvider from "@/providers/MainProvider";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -22,15 +20,15 @@ export const metadata: Metadata = {
       {
         rel: "icon",
         type: "image/png",
-        url: "/icon-light.png",
-        href: "/icon-light.png",
+        url: "/icon-dark.png",
+        href: "/icon-dark.png",
         media: "(prefers-color-scheme: light)",
       },
       {
         rel: "icon",
         type: "image/png",
-        url: "/icon-dark.png",
-        href: "/icon-dark.png",
+        url: "/icon-light.png",
+        href: "/icon-light.png",
         media: "(prefers-color-scheme: dark)",
       },
     ],
@@ -42,11 +40,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="!scroll-smooth" suppressHydrationWarning>
-      <body className={`${font.className} flex h-screen flex-col antialiased`}>
+      <body className={font.className}>
         <MainProvider>
-          <Header />
-          <main className="container my-8 flex-1 md:my-16">{children}</main>
-          <Footer />
+          <div className="h-screen">{children}</div>
           <Toaster />
         </MainProvider>
       </body>
