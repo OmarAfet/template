@@ -22,7 +22,7 @@ To get started with this template, follow these simple steps:
 git clone https://github.com/OmarAfet/template.git .
 git remote rm origin
 bun i
-bun run dev
+bun dev
 ```
 
 That's it! You're ready to start building your awesome web application with this template. If you have any questions or feedback, feel free to reach out to @OmarAfet on GitHub.
