@@ -1,5 +1,6 @@
 "use client";
 
+import { sendContact } from "@/actions/contact";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,18 +20,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useToast } from "@/components/ui/use-toast";
-
-const formSchema = z.object({
-  email: z.string().email(),
-  subject: z.string().min(5),
-  message: z.string().min(10),
-});
+import LoadingIcon from "@/icons/LoadingIcon";
+import { formSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 export default function Contact() {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,37 +41,15 @@ export default function Contact() {
     },
   });
 
-  function handleSubmit(values: z.infer<typeof formSchema>) {
-    const payload = {
-      username: values.email,
-      embeds: [
-        {
-          title: values.subject,
-          description: values.message,
-        },
-      ],
-    };
-
-    fetch(process.env.DISCORD_WEBHOOK as string, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        if (response.ok) {
-          toast({
-            title: "Your message has been sent!",
-            description: "We will get back to you as soon as possible.",
-          });
-        } else {
-          throw new Error("Failed to send embedded message");
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to send embedded message:", error);
-      });
+  async function handleSubmit(formData: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    const res = await sendContact(formData);
+    form.reset();
+    toast({
+      title: res.status ? "Success" : "Error",
+      description: res.message,
+    });
+    setIsLoading(false);
   }
 
   return (
@@ -80,7 +57,7 @@ export default function Contact() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <CardHeader>
-            <CardTitle>Contact Support</CardTitle>
+            <CardTitle className="mt-0">Contact Support</CardTitle>
             <CardDescription>
               Have a question or need help? We&apos;re here for you.
             </CardDescription>
@@ -135,8 +112,9 @@ export default function Contact() {
             />
           </CardContent>
           <CardFooter>
-            <Button className="flex-1" type="submit">
+            <Button disabled={isLoading} className="flex-1" type="submit">
               Submit
+              {isLoading && <LoadingIcon className="ml-2" />}
             </Button>
           </CardFooter>
         </form>
