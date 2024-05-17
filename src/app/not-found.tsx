@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 
@@ -13,8 +13,8 @@ export default function notFound() {
         <h4>Page Not Found.</h4>
       </div>
       <div>
-        <Link href="/">
-          <Button variant="outline">Return Home</Button>
+        <Link href="/" className={buttonVariants({ variant: "outline" })}>
+          Return Home
         </Link>
       </div>
     </div>
