@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s | Template", // %s will be replaced with the page title
     default: "Template",
   },
-  description: "A Sstraightforward NextJS Template Made by @OmarAfet",
+  description: "A Straightforward NextJS Template Made by @OmarAfet",
   keywords: ["Template", "Keyword 2", "Keyword 3"],
   metadataBase: new URL("https://template.omarafet.vercel.app"),
   authors: { url: "https://github.com/OmarAfet", name: "OmarAfet" },
