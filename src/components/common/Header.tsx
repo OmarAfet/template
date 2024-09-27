@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { ModeToggle } from "./ModeToggle";
 import TemplateMark from "@/icons/TemplateMark";
+import Link from "next/link";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 const links = ["About", "Contact"];
 
@@ -16,7 +16,7 @@ export default function Header() {
             {link}
           </Link>
         ))}
-        <ModeToggle />
+        <ThemeSwitcher />
       </div>
     </header>
   );

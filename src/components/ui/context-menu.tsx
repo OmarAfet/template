@@ -1,14 +1,14 @@
 "use client";
 
-import * as React from "react";
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
 import {
   CheckIcon,
   ChevronRightIcon,
   DotFilledIcon,
 } from "@radix-ui/react-icons";
+import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 
 const ContextMenu = ContextMenuPrimitive.Root;
 
@@ -103,7 +103,7 @@ const ContextMenuCheckboxItem = React.forwardRef<
       "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
-    checked={checked}
+    checked={checked ?? false}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
@@ -187,18 +187,18 @@ ContextMenuShortcut.displayName = "ContextMenuShortcut";
 
 export {
   ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuContent,
-  ContextMenuItem,
   ContextMenuCheckboxItem,
-  ContextMenuRadioItem,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
   ContextMenuLabel,
+  ContextMenuPortal,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
   ContextMenuSeparator,
   ContextMenuShortcut,
-  ContextMenuGroup,
-  ContextMenuPortal,
   ContextMenuSub,
   ContextMenuSubContent,
   ContextMenuSubTrigger,
-  ContextMenuRadioGroup,
+  ContextMenuTrigger,
 };
