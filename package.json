@@ -1,5 +1,4 @@
 {
-  "name": "template-new",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
