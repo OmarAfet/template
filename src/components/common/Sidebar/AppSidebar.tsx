@@ -2,6 +2,7 @@
 
 import * as React from "react"
 
+import { Separator } from "@/components/ui/separator"
 import {
   Sidebar,
   SidebarContent,
@@ -9,11 +10,9 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import navigationData from "@/config/navigations"
 import Logo from "@/icons/Logo"
 import { NavMain } from "./NavMain"
 import { NavUser } from "./NavUser"
-import { Separator } from "@/components/ui/separator"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -24,7 +23,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navigationData} />
+        <NavMain />
       </SidebarContent>
       <Separator />
       <SidebarFooter>

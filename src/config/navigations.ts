@@ -2,10 +2,31 @@ import {
     FileText,
     Home,
     Inbox,
-    TestTubeDiagonal
+    TestTubeDiagonal,
+    type LucideIcon
 } from "lucide-react";
 
-const navigationData = [
+
+export interface NavItemConfig {
+    name: string;
+    icon: LucideIcon;
+    href: string;
+}
+
+export interface NavGroupConfig {
+    name: string;
+    collapsible: boolean;
+    children: NavItemConfig[];
+    isOpenByDefault?: boolean;
+}
+
+export type NavigationEntry = NavItemConfig | NavGroupConfig;
+
+export function isNavGroup(entry: NavigationEntry): entry is NavGroupConfig {
+    return (entry as NavGroupConfig).children !== undefined;
+}
+
+const navigationData: NavigationEntry[] = [
     {
         name: "Home",
         icon: Home,
@@ -21,20 +42,28 @@ const navigationData = [
         icon: Inbox,
         href: "/contact"
     },
+
     {
-        name: "One",
-        icon: TestTubeDiagonal,
-        href: "/one"
-    },
-    {
-        name: "Two",
-        icon: TestTubeDiagonal,
-        href: "/one/two"
-    },
-    {
-        name: "Three",
-        icon: TestTubeDiagonal,
-        href: "/one/two/three"
+        name: "Numbers",
+        collapsible: true,
+        isOpenByDefault: false,
+        children: [
+            {
+                name: "One",
+                icon: TestTubeDiagonal,
+                href: "/one",
+            },
+            {
+                name: "Two",
+                icon: TestTubeDiagonal,
+                href: "/one/two",
+            },
+            {
+                name: "Three",
+                icon: TestTubeDiagonal,
+                href: "/one/two/three",
+            }
+        ]
     }
 ]
 
