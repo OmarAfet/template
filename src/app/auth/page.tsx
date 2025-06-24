@@ -1,7 +1,6 @@
 'use client'
 
-import { signInWithPassword, signUpWithPassword, resetPassword } from "@/actions/auth"
-import { Alert } from "@/components/ui/alert"
+import { resetPassword, signInWithPassword, signUpWithPassword } from "@/actions/auth"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -23,34 +22,54 @@ import { Label } from "@/components/ui/label"
 import { useIsMobile } from "@/hooks/use-mobile"
 import Logo from "@/icons/Logo"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
-import { useState } from "react"
+import { Loader2 } from "lucide-react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
-
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-})
 
 const resetFormSchema = z.object({
   email: z.string().email(),
 })
 
 export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [resetDialogOpen, setResetDialogOpen] = useState(false)
-  const [resetSuccess, setResetSuccess] = useState<string | null>(null)
-  const [resetError, setResetError] = useState<string | null>(null)
   const isMobile = useIsMobile()
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  // Create dynamic schema based on sign-up state
+  const createFormSchema = (isSignUpMode: boolean) => {
+    const base = z.object({
+      email: z.string().email(),
+      password: z.string().min(6),
+      confirmPassword: z.string().optional(),
+    })
+
+    if (isSignUpMode) {
+      return base.refine((data) => data.password === data.confirmPassword, {
+        message: "Passwords don't match",
+        path: ["confirmPassword"],
+      })
+    }
+
+    return base
+  }
+
+  const form = useForm({
+    resolver: zodResolver(createFormSchema(isSignUp)),
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
     },
   })
+
+  // Clear confirmPassword when switching to sign-in mode  
+  useEffect(() => {
+    if (!isSignUp) {
+      form.setValue("confirmPassword", "")
+      form.clearErrors("confirmPassword")
+    }
+  }, [isSignUp, form])
 
   const resetForm = useForm<z.infer<typeof resetFormSchema>>({
     resolver: zodResolver(resetFormSchema),
@@ -58,16 +77,14 @@ export default function LoginPage() {
       email: "",
     },
   })
-
   const {
     formState: { isSubmitting },
   } = form
-
   const {
     formState: { isSubmitting: isResetSubmitting },
   } = resetForm
-  const handleAuth = async (values: z.infer<typeof formSchema>) => {
-    setError(null)
+
+  const handleAuth = async (values: { email: string; password: string; confirmPassword?: string | undefined }) => {
     const formData = new FormData()
     formData.append("email", values.email)
     formData.append("password", values.password)
@@ -77,52 +94,42 @@ export default function LoginPage() {
       : await signInWithPassword(formData)
 
     if (result?.error) {
-      setError(result.error)
+      toast.error(result.error)
     }
   }
 
   const handleResetPassword = async (values: z.infer<typeof resetFormSchema>) => {
-    setResetError(null)
-    setResetSuccess(null)
-    
     const formData = new FormData()
     formData.append("email", values.email)
 
     const result = await resetPassword(formData)
 
     if (result?.error) {
-      setResetError(result.error)
+      toast.error(result.error)
     } else if (result?.success) {
-      setResetSuccess(result.success)
+      toast.success(result.success)
       resetForm.reset()
       setTimeout(() => {
         setResetDialogOpen(false)
-        setResetSuccess(null)
-      }, 3000)
+      }, 2000)
     }
   }
-
   const AuthForm = (
     <div className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <span>{error}</span>
-        </Alert>
-      )}
-
-      <form onSubmit={form.handleSubmit(handleAuth)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            required
-            disabled={isSubmitting}
-            {...form.register("email")}
-          />
-        </div>        <div className="space-y-2">
+      <form onSubmit={form.handleSubmit(handleAuth)} className="space-y-4"><div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="Enter your email"
+          required
+          disabled={isSubmitting}
+          {...form.register("email")}
+        />
+        {form.formState.errors.email && (
+          <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+        )}
+      </div><div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
@@ -133,6 +140,9 @@ export default function LoginPage() {
             minLength={6}
             {...form.register("password")}
           />
+          {form.formState.errors.password && (
+            <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+          )}
           {!isSignUp && (
             <div className="text-right">
               <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
@@ -147,20 +157,7 @@ export default function LoginPage() {
                     <DialogDescription>
                       Enter your email address and we&apos;ll send you a link to reset your password.
                     </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    {resetError && (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <span>{resetError}</span>
-                      </Alert>
-                    )}
-                    {resetSuccess && (
-                      <Alert>
-                        <CheckCircle2 className="h-4 w-4" />
-                        <span>{resetSuccess}</span>
-                      </Alert>
-                    )}
+                  </DialogHeader>                  <div className="space-y-4">
                     <form onSubmit={resetForm.handleSubmit(handleResetPassword)} className="space-y-4">
                       <div className="space-y-2">
                         <Label htmlFor="reset-email">Email</Label>
@@ -169,14 +166,14 @@ export default function LoginPage() {
                           type="email"
                           placeholder="Enter your email address"
                           required
-                          disabled={isResetSubmitting || resetSuccess !== null}
+                          disabled={isResetSubmitting}
                           {...resetForm.register("email")}
                         />
                       </div>
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
-                        disabled={isResetSubmitting || resetSuccess !== null}
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={isResetSubmitting}
                       >
                         {isResetSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Send Reset Link
@@ -186,8 +183,24 @@ export default function LoginPage() {
                 </DialogContent>
               </Dialog>
             </div>
-          )}
-        </div>
+          )}        </div>
+
+        {isSignUp && (
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Confirm your password"
+              required
+              disabled={isSubmitting}
+              minLength={6}
+              {...form.register("confirmPassword")}
+            />            {isSignUp && form.formState.errors.confirmPassword && (
+              <p className="text-sm text-destructive">{form.formState.errors.confirmPassword.message}</p>
+            )}
+          </div>
+        )}
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -224,17 +237,8 @@ export default function LoginPage() {
       </div>
     </div>
   )
-
-  if (isMobile) {
-    return (
-      <div className="size-full bg-gradient-to-br from-background to-muted flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
   return (
-    <div className="size-full bg-gradient-to-br from-background to-muted">
+    <div className="size-full bg-gradient-to-br from-background to-muted py-16">
       <div className="size-full flex items-center justify-center flex-col space-y-8 p-4 md:p-0">
         <Logo />
         {isMobile ? (
