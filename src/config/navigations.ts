@@ -10,6 +10,7 @@ export interface NavItemConfig {
     name: string;
     icon: LucideIcon;
     href: string;
+    requireAuth?: boolean;
 }
 
 export interface NavGroupConfig {
@@ -17,6 +18,7 @@ export interface NavGroupConfig {
     collapsible: boolean;
     children: NavItemConfig[];
     isOpenByDefault?: boolean;
+    requireAuth?: boolean;
 }
 
 export type NavigationEntry = NavItemConfig | NavGroupConfig;
@@ -40,30 +42,7 @@ const navigationData: NavigationEntry[] = [
         name: "Contact",
         icon: Inbox,
         href: "/contact"
-    },
-
-    // {
-    //     name: "Numbers",
-    //     collapsible: true,
-    //     isOpenByDefault: false,
-    //     children: [
-    //         {
-    //             name: "One",
-    //             icon: TestTubeDiagonal,
-    //             href: "/one",
-    //         },
-    //         {
-    //             name: "Two",
-    //             icon: TestTubeDiagonal,
-    //             href: "/one/two",
-    //         },
-    //         {
-    //             name: "Three",
-    //             icon: TestTubeDiagonal,
-    //             href: "/one/two/three",
-    //         }
-    //     ]
-    // }
+    }
 ]
 
 export default navigationData;

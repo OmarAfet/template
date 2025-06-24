@@ -5,8 +5,8 @@ import Link from "@/components/common/Link";
 
 export default function notFound() {
   return (
-    <div className="center h-full w-full flex-col gap-8 text-2xl">
-      <div className="center gap-4 text-2xl">
+    <div className="flex items-center justify-center h-full w-full flex-col gap-8 text-2xl">
+      <div className="flex items-center justify-center gap-4 text-2xl">
         <h1 className="text-red-500 font-bold text-4xl">404</h1>
         <Separator className="h-12" orientation="vertical" />
         <h4>Page Not Found.</h4>
