@@ -2,7 +2,6 @@ import {
     FileText,
     Home,
     Inbox,
-    TestTubeDiagonal,
     type LucideIcon
 } from "lucide-react";
 
@@ -43,28 +42,28 @@ const navigationData: NavigationEntry[] = [
         href: "/contact"
     },
 
-    {
-        name: "Numbers",
-        collapsible: true,
-        isOpenByDefault: false,
-        children: [
-            {
-                name: "One",
-                icon: TestTubeDiagonal,
-                href: "/one",
-            },
-            {
-                name: "Two",
-                icon: TestTubeDiagonal,
-                href: "/one/two",
-            },
-            {
-                name: "Three",
-                icon: TestTubeDiagonal,
-                href: "/one/two/three",
-            }
-        ]
-    }
+    // {
+    //     name: "Numbers",
+    //     collapsible: true,
+    //     isOpenByDefault: false,
+    //     children: [
+    //         {
+    //             name: "One",
+    //             icon: TestTubeDiagonal,
+    //             href: "/one",
+    //         },
+    //         {
+    //             name: "Two",
+    //             icon: TestTubeDiagonal,
+    //             href: "/one/two",
+    //         },
+    //         {
+    //             name: "Three",
+    //             icon: TestTubeDiagonal,
+    //             href: "/one/two/three",
+    //         }
+    //     ]
+    // }
 ]
 
 export default navigationData;
