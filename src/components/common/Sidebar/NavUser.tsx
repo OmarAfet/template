@@ -1,5 +1,6 @@
 "use client"
 
+import { signOut } from "@/actions/auth"
 import Link from "@/components/common/Link"
 import {
   Avatar,
@@ -21,17 +22,88 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import userData from "@/config/user"
+import { createClient } from "@/utils/supabase/client"
+import { User } from "@supabase/supabase-js"
 import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
   CreditCard,
+  LogIn,
   LogOut
 } from "lucide-react"
+import { useEffect, useState } from "react"
 
-export function NavUser() { 
+export function NavUser() {
   const { isMobile } = useSidebar()
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    // Get initial user
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      setLoading(false)
+    }
+
+    getUser()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_, session) => {
+        setUser(session?.user ?? null)
+        setLoading(false)
+      }
+    )
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleSignOut = async () => {
+    await signOut()
+  }
+
+  if (loading) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" className="animate-pulse">
+            <div className="h-8 w-8 rounded-lg bg-muted" />
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="h-4 w-20 bg-muted rounded" />
+              <div className="h-3 w-32 bg-muted rounded mt-1" />
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
+  if (!user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild>
+            <Link href="/auth">
+              <LogIn className="h-4 w-4" />
+              <span>Sign In</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
+  // Extract initials from email or name
+  const getInitials = (email: string) => {
+    return email.substring(0, 2).toUpperCase()
+  }
+
+  const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+  const displayEmail = user.email || ''
 
   return (
     <SidebarMenu>
@@ -43,12 +115,17 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={userData.avatar} alt={userData.name} />
-                <AvatarFallback className="rounded-lg">OA</AvatarFallback>
+                <AvatarImage
+                  src={user.user_metadata?.avatar_url || user.user_metadata?.picture}
+                  alt={displayName}
+                />
+                <AvatarFallback className="rounded-lg">
+                  {getInitials(displayEmail)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{userData.name}</span>
-                <span className="truncate text-xs text-muted-foreground">{userData.email}</span>
+                <span className="truncate font-medium">{displayName}</span>
+                <span className="truncate text-xs text-muted-foreground">{displayEmail}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -62,12 +139,17 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={userData.avatar} alt={userData.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage
+                    src={user.user_metadata?.avatar_url || user.user_metadata?.picture}
+                    alt={displayName}
+                  />
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(displayEmail)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{userData.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">{userData.email}</span>
+                  <span className="truncate font-medium">{displayName}</span>
+                  <span className="truncate text-xs text-muted-foreground">{displayEmail}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -93,7 +175,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>
               <LogOut />
               Log out
             </DropdownMenuItem>
