@@ -1,5 +1,4 @@
 import {
-    FileText,
     Home,
     Inbox,
     type LucideIcon
@@ -32,11 +31,6 @@ const navigationData: NavigationEntry[] = [
         name: "Home",
         icon: Home,
         href: "/"
-    },
-    {
-        name: "About",
-        icon: FileText,
-        href: "/about"
     },
     {
         name: "Contact",
