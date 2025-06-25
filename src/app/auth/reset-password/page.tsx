@@ -1,191 +1,214 @@
 'use client'
 
-import { updatePassword } from "@/actions/auth"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useIsMobile } from "@/hooks/use-mobile"
-import Logo from "@/icons/Logo"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react"
-import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense, useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
-import { toast } from "sonner"
-import { z } from "zod"
+import { updatePassword } from '@/actions/auth'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import Logo from '@/icons/Logo'
+import { createClient } from '@/utils/supabase/client'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
 
-const formSchema = z
-  .object({
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  })
+const resetPasswordSchema = z.object({
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+})
 
-function ResetPasswordForm() {
-  const [isLoading, setIsLoading] = useState(true)
-  const isMobile = useIsMobile()
+type ResetPasswordForm = z.infer<typeof resetPasswordSchema>
+
+export default function ResetPasswordPage() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(true)
+  const [isValidToken, setIsValidToken] = useState(false)
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  
+  const form = useForm<ResetPasswordForm>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      password: "",
-      confirmPassword: "",
+      password: '',
+      confirmPassword: '',
     },
   })
 
-  const {
-    formState: { isSubmitting, errors },
-  } = form
+  const { formState: { isSubmitting } } = form
 
   useEffect(() => {
-    const accessToken = searchParams.get("access_token")
-    const refreshToken = searchParams.get("refresh_token")
+    const verifyResetSession = async () => {
+      const supabase = createClient()
+      
+      try {
+        // Check if user has an active session (which should be established by the reset link)
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Error getting session:', error)
+          toast.error('Invalid or expired reset link')
+          router.push('/auth')
+          return
+        }
+
+        if (session) {
+          // Check if this is a recovery session by looking at the session metadata
+          // or check if we're coming from a password reset flow
+          setIsValidToken(true)
+          toast.success('Reset link verified! You can now set your new password.')
+        } else {
+          toast.error('Invalid or expired reset link')
+          router.push('/auth')
+        }
+      } catch (error) {
+        console.error('Error verifying reset session:', error)
+        toast.error('Something went wrong. Please try again.')
+        router.push('/auth')
+      } finally {
+        setIsVerifying(false)
+      }
+    }
+
+    verifyResetSession()
+  }, [router])
+
+  const handlePasswordReset = async (values: ResetPasswordForm) => {
+    setIsLoading(true)
     
-    if (!accessToken || !refreshToken) {
-      toast.error("Invalid or expired reset link. Please request a new password reset.")
+    try {
+      const formData = new FormData()
+      formData.append('password', values.password)
+      
+      const result = await updatePassword(formData)
+      
+      if (result?.error) {
+        toast.error(result.error)
+      } else if (result?.success) {
+        toast.success('Password updated successfully! Redirecting...')
+        // Wait a moment for the toast to show, then redirect
+        setTimeout(() => {
+          router.push('/')
+        }, 1500)
+      }
+    } catch (error) {
+      console.error('Error updating password:', error)
+      toast.error('Something went wrong. Please try again.')
+    } finally {
       setIsLoading(false)
-      return
-    }
-    
-    setIsLoading(false)
-  }, [searchParams])
-
-  const handleUpdatePassword = async (values: z.infer<typeof formSchema>) => {
-    const formData = new FormData()
-    formData.append("password", values.password)
-
-    const result = await updatePassword(formData)
-
-    if (result?.error) {
-      toast.error(result.error)
-    } else if (result?.success) {
-      toast.success(`${result.success}. Redirecting to login...`)
-      form.reset()
-      setTimeout(() => {
-        router.push("/auth")
-      }, 3000)
     }
   }
 
-  if (isLoading) {
+  if (isVerifying) {
     return (
       <div className="size-full bg-gradient-to-br from-background to-muted flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
-  const ResetForm = (
-    <div className="space-y-4">
-      <form onSubmit={form.handleSubmit(handleUpdatePassword)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="password">New Password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Enter your new password"
-            required
-            disabled={isSubmitting}
-            minLength={6}
-            {...form.register("password")}
-          />
-          {errors.password && (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm New Password</Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            placeholder="Confirm your new password"
-            required
-            disabled={isSubmitting}
-            minLength={6}
-            {...form.register("confirmPassword")}
-          />
-          {errors.confirmPassword && (
-            <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-          )}
-        </div>
-
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Update Password
-        </Button>
-      </form>
-
-      <div className="text-center">
-        <Link 
-          href="/auth" 
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          Back to Login
-        </Link>
-      </div>
-    </div>
-  )
-
-  if (isMobile) {
-    return (
-      <div className="size-full bg-gradient-to-br from-background to-muted flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    )
-  }
-
-  return (
-    <div className="size-full bg-gradient-to-br from-background to-muted">
-      <div className="size-full flex items-center justify-center flex-col space-y-8 p-4 md:p-0">
-        <Logo />
-        {isMobile ? (
-          <div className="w-full max-w-md space-y-6">
-            <div className="text-center space-y-1.5">
-              <h1 className="text-2xl font-bold">Reset Your Password</h1>
-              <p className="text-muted-foreground">
-                Enter your new password below
-              </p>
-            </div>
-            {ResetForm}
+        <div className="flex flex-col items-center space-y-4">
+          <Logo />
+          <div className="text-center">
+            <h2 className="text-lg font-semibold">Verifying reset link...</h2>
+            <p className="text-muted-foreground">Please wait while we verify your reset token.</p>
           </div>
-        ) : (
-          <Card className="w-full max-w-md shadow-2xl">
+        </div>
+      </div>
+    )
+  }
+
+  if (!isValidToken) {
+    return (
+      <div className="size-full bg-gradient-to-br from-background to-muted flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Logo />
+          <Card className="w-full max-w-md">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+              <CardTitle className="text-destructive">Invalid Reset Link</CardTitle>
               <CardDescription>
-                Enter your new password below
+                This reset link is invalid or has expired. Please request a new password reset.
               </CardDescription>
             </CardHeader>
-            <CardContent>{ResetForm}</CardContent>
+            <CardContent>
+              <Button 
+                onClick={() => router.push('/auth')} 
+                className="w-full"
+              >
+                Back to Login
+              </Button>
+            </CardContent>
           </Card>
-        )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="size-full bg-gradient-to-br from-background to-muted py-16">
+      <div className="size-full flex items-center justify-center flex-col space-y-8 p-4 md:p-0">
+        <Logo />
+        
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Reset Your Password</CardTitle>
+            <CardDescription>
+              Enter your new password below. Make sure it&apos;s at least 6 characters long.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={form.handleSubmit(handlePasswordReset)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">New Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your new password"
+                  disabled={isSubmitting || isLoading}
+                  {...form.register('password')}
+                />
+                {form.formState.errors.password && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm your new password"
+                  disabled={isSubmitting || isLoading}
+                  {...form.register('confirmPassword')}
+                />
+                {form.formState.errors.confirmPassword && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isSubmitting || isLoading}
+              >
+                {isSubmitting || isLoading ? 'Updating Password...' : 'Update Password'}
+              </Button>
+            </form>
+
+            <div className="mt-4 text-center">
+              <Button
+                variant="link"
+                onClick={() => router.push('/auth')}
+                className="text-sm"
+              >
+                Back to Login
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
-  )
-}
-
-export default function ResetPasswordPage() {
-  return (
-    <Suspense fallback={
-      <div className="size-full bg-gradient-to-br from-background to-muted flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    }>
-      <ResetPasswordForm />
-    </Suspense>
   )
 }

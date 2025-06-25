@@ -68,7 +68,7 @@ export async function updatePassword(formData: FormData) {
     const supabase = await createClient()
 
     const { error } = await supabase.auth.updateUser({
-        password: password,
+        password,
     })
 
     if (error) {
@@ -77,8 +77,10 @@ export async function updatePassword(formData: FormData) {
         }
     }
 
+    revalidatePath("/", "layout")
+    
     return {
-        success: "Password updated successfully",
+        success: "Password updated successfully!",
     }
 }
 
