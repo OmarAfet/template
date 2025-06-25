@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <body className={cn("antialiased flex", font.className)}>
         <Providers>
-          <div className="size-full *:size-full">{children}</div>
+          <div className="size-full">{children}</div>
         </Providers>
       </body>
     </html>
