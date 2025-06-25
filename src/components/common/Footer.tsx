@@ -1,7 +1,19 @@
 import Link from "@/components/common/Link";
+import navigationData, { isNavGroup, NavItemConfig } from "@/config/navigations";
 import Logo from "@/icons/Logo";
 
 export default function Footer() {
+  // Extract all navigation items (both single items and items from groups)
+  const allNavItems: NavItemConfig[] = [];
+  
+  navigationData.forEach(entry => {
+    if (isNavGroup(entry)) {
+      allNavItems.push(...entry.children);
+    } else {
+      allNavItems.push(entry);
+    }
+  });
+
   return (
     <footer className="border-t p-6">
       <div className="@container/footer">
@@ -20,9 +32,11 @@ export default function Footer() {
             <div>
               <h3 className="text-lg font-semibold mb-3">Quick Links</h3>
               <ul className="space-y-2 *:text-muted-foreground *:hover:text-foreground *:transition-colors *:w-fit">
-                <li><Link href="/">Home</Link></li>
-                <li><Link href="/services">Services</Link></li>
-                <li><Link href="/contact">Contact</Link></li>
+                {allNavItems.map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href}>{item.name}</Link>
+                  </li>
+                ))}
               </ul>
             </div>
             <div>
