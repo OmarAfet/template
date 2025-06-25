@@ -153,10 +153,10 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem disabled asChild>
-                <Link href="/settings">
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
                   <Settings />
-                  Settings
+                  Profile
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

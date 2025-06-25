@@ -7,11 +7,15 @@ export async function middleware(request: NextRequest) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
+    // If user is not authenticated and trying to access protected routes, redirect to auth
+    if (!user && path.startsWith("/profile")) {
+        return NextResponse.redirect(new URL('/auth', request.url))
+    }
+
     // If user is authenticated and trying to access auth pages (except reset-password), redirect to home
     if (user && path.startsWith("/auth") && !path.startsWith("/auth/reset-password")) {
         return NextResponse.redirect(new URL('/', request.url))
     }
-
 
     // update user's auth session
     return await updateSession(request)
