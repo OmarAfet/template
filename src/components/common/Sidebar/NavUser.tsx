@@ -25,12 +25,10 @@ import {
 import { createClient } from "@/utils/supabase/client"
 import { User } from "@supabase/supabase-js"
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogIn,
-  LogOut
+  LogOut,
+  Settings
 } from "lucide-react"
 import { useEffect, useState } from "react"
 
@@ -155,22 +153,10 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link href="/account">
-                  <BadgeCheck />
-                  Account
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/billing">
-                  <CreditCard />
-                  Billing
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/notifications">
-                  <Bell />
-                  Notifications
+              <DropdownMenuItem disabled asChild>
+                <Link href="/settings">
+                  <Settings />
+                  Settings
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

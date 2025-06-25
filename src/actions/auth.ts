@@ -94,5 +94,5 @@ export async function signOut() {
     }
 
     revalidatePath("/", "layout")
-    redirect("/")
+    redirect("/auth")
 }
