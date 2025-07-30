@@ -6,6 +6,6 @@ Everything is pre-configured so you can focus on building features rather than s
 ```bash
 git clone https://github.com/OmarAfet/template.git .
 git remote rm origin
-npm i
-npm run dev
+bun install
+bun dev
 ```
