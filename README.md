@@ -24,7 +24,7 @@ bun dev
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your_anon_key
 ```
 
 ### Option 2: Remove Supabase
